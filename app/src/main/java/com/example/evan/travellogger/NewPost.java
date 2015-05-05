@@ -16,6 +16,7 @@ public class NewPost extends AppCompatActivity {
 
     private static final String TAG = NewPost.class.getName();
 
+    private int test = 0;
     private ImageButton cameraButton;
     private ImageButton galleryButton;
 
