@@ -1,18 +1,43 @@
 package com.example.evan.travellogger;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.PopupWindow;
 
 
 public class NewTrip extends AppCompatActivity {
+
+    EditText tripName;
+    EditText tripDescription;
+    PopupWindow popWind;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_trip);
+        Log.e("HI", "IT IS STARTING!!!!!!!!!!!!!!!!!!");
+        popWind = new PopupWindow(this);
+
+        tripName = (EditText) findViewById(R.id.trip_name_field);
+        tripDescription = (EditText) findViewById(R.id.trip_description_field);
+
+        MySQLiteHelper db = new MySQLiteHelper(getApplicationContext());
+
+        Log.e("new trip", "this is a test to see log output");
+        Trip trip = new Trip("myTitle", "Mydescription", 0);
+        db.addTrip(trip);
+        Trip retrieval = db.getTrip(trip.id);
+        Log.e("retrieal", retrieval.title);
+        //Trip retrieve =
+        //db.addTrip("test");
+
     }
 
 
@@ -37,4 +62,18 @@ public class NewTrip extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public void newTripButtonAction(View view) {
+        Log.e("thing", "trip button was pressed");
+        String tripNameString = tripName.getText().toString();
+        String tripDescriptionString = tripDescription.getText().toString();
+        Trip trip = new Trip(tripNameString, tripDescriptionString);
+        Log.e("trip", trip.description);
+        (new MySQLiteHelper(getApplicationContext())).addTrip(trip);
+        tripName.setText(Integer.toString(trip.id));
+        Trip.setCurrentTrip(trip);
+        Intent intent = new Intent(this, NewPost.class);
+        startActivity(intent);
+    }
+
 }

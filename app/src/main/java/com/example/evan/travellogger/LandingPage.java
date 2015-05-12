@@ -1,10 +1,16 @@
 package com.example.evan.travellogger;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Color;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.internal.app.ToolbarActionBar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,14 +19,20 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 
-public class LandingPage extends Activity {
+public class LandingPage extends AppCompatActivity {
     private static final String TAG = LandingPage.class.getName();
 
     private Button newPostButton;
     private Button newTripButton;
 
+    private ViewPager viewPager;
+    private TabsPagerAdapter mAdapter;
+    private ActionBar actionBar;
+    // Tab titles
+    private String[] tabs = {"Top Rated", "Games", "Movies"};
 
-    @Override
+
+    /*@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_landing_page);
@@ -28,25 +40,15 @@ public class LandingPage extends Activity {
         final RelativeLayout landingPage = (RelativeLayout) findViewById(R.id.landing_page);
         newPostButton = (Button) findViewById(R.id.new_post_button);
         newTripButton = (Button) findViewById(R.id.new_trip_button);
+    }*/
+
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_landing_page);
+
     }
 
 
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     public void newPostButtonAction(View view) {
         startNewPostActivity(view);
@@ -65,4 +67,11 @@ public class LandingPage extends Activity {
         Intent intent = new Intent(this, NewTrip.class);
         startActivity(intent);
     }
+
+    public void onPause() {
+        super.onPause();
+        Log.e("hi", "this is on pause");
+    }
+
+
 }
