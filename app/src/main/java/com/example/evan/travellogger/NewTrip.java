@@ -1,6 +1,7 @@
 package com.example.evan.travellogger;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -67,11 +68,20 @@ public class NewTrip extends AppCompatActivity {
         Log.e("thing", "trip button was pressed");
         String tripNameString = tripName.getText().toString();
         String tripDescriptionString = tripDescription.getText().toString();
+
         Trip trip = new Trip(tripNameString, tripDescriptionString);
-        Log.e("trip", trip.description);
+        Log.e("newTripbuttonaction", trip.toString());
         (new MySQLiteHelper(getApplicationContext())).addTrip(trip);
-        tripName.setText(Integer.toString(trip.id));
         Trip.setCurrentTrip(trip);
+
+        Log.e("newTripbuttonAction", Trip.getCurrentTrip().toString());
+
+        if(Trip.getCurrentTrip() != null) {
+            Storage.getInstance().saveInt(Trip.CURRENT_TRIP_ID_KEY, Trip.getCurrentTrip().id, this);
+            Log.e("saving trip: ", Trip.getCurrentTrip().toString());
+        } else {
+            Log.e("hi", "current trip is null...");
+        }
         Intent intent = new Intent(this, NewPost.class);
         startActivity(intent);
     }

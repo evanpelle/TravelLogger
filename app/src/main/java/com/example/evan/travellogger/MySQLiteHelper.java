@@ -110,7 +110,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
 
         //log
-        Log.d("getBook("+id+")", trip.title);
+        //Log.d("getBook("+id+")", trip.title);
 
         // 5. return book
         return trip;
@@ -142,7 +142,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
 
         //log
-        Log.d("getPost("+id+")", post.title);
+        //Log.d("getPost("+id+")", post.title);
 
         // 5. return book
         return post;

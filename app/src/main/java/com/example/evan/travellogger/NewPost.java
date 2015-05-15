@@ -75,16 +75,15 @@ public class NewPost extends AppCompatActivity {
 
     public void newPostButtonAction(View view) {
 
-        Log.e(TAG, "new post button was pressed");
+        //Log.e(TAG, "new post button was pressed");
         String title = titleField.getText().toString();
         String description = descriptionField.getText().toString();
         Post post = new Post(title, description, -1);
-        titleField.setText(Integer.toString(post.id));
+        //titleField.setText(Integer.toString(post.id));
         //MySQLiteHelper db = new MySQLiteHelper(this);
         //db.destroy(this);
         //db.addPost(post);
         //Post retrieve = db.getPost(post.id);
         Log.e("got the post", post.title);
-
     }
 }

@@ -13,7 +13,10 @@ public class Trip {
     String title;
     String description;
     Calendar startDatetime;
+
     public static final String PREFS_NAME = "myPrefs";
+    private static Trip current_trip;
+    public static final String CURRENT_TRIP_ID_KEY = "current_trip";
 
     public Trip(String title, String description, int parent_id) {
         this.title = title;
@@ -31,13 +34,17 @@ public class Trip {
         this(title, description, parent.id);
     }
 
-    public static Trip getCurrentTrip() {
-        return null;
+    public String toString() {
+        return "title: " + title + ", description: " + description +
+                ", id: " + this.id;
     }
 
     public static void setCurrentTrip(Trip trip) {
+        Trip.current_trip = trip;
+    }
 
-
+    public static Trip getCurrentTrip() {
+        return Trip.current_trip;
     }
 
 }

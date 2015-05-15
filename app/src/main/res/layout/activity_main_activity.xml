@@ -1,0 +1,53 @@
+
+
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LandingPage"
+    android:id="@+id/landing_page"
+    android:clickable="true"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/tool_bar"
+        ></include>
+
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="TravelLog"
+            android:id="@+id/title_text"
+            android:textSize="50dp"
+            android:typeface="normal"
+            android:layout_below="@+id/new_post_button"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="83dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Post"
+            android:id="@+id/new_post_button"
+            android:layout_marginTop="83dp"
+            android:onClick="newPostButtonAction"
+            android:layout_gravity="center"
+            android:layout_below="@+id/new_trip_button"
+            android:layout_alignLeft="@+id/new_trip_button"
+            android:layout_alignStart="@+id/new_trip_button" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Trip"
+            android:id="@+id/new_trip_button"
+            android:onClick="newTripButtonAction"
+            android:layout_gravity="center"
+            android:layout_below="@+id/view"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="69dp" />
+</RelativeLayout>
