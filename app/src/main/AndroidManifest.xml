@@ -2,6 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.evan.travellogger" >
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,12 +27,23 @@
         </activity>
         <activity
             android:name=".NewPost"
-            android:label="@string/title_activity_new_post" >
+            android:label="@string/title_activity_new_post"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
+            >
         </activity>
         <activity
             android:name=".NewTrip"
             android:label="@string/title_activity_new_trip" >
         </activity>
+
+        <service
+            android:name=".GPSService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
+
     </application>
 
 </manifest>

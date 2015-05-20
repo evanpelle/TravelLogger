@@ -1,0 +1,50 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.example.evan.travellogger.GPSActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Latitidue"
+        android:id="@+id/latitude_label"
+        android:layout_marginTop="69dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignLeft="@+id/longitude_label"
+        android:layout_alignStart="@+id/longitude_label" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Longitude"
+        android:id="@+id/longitude_label"
+        android:layout_marginTop="62dp"
+        android:layout_below="@+id/latitude_label"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="55dp"
+        android:layout_marginStart="55dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No coordinates yet"
+        android:id="@+id/latitude_field"
+        android:layout_alignTop="@+id/latitude_label"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="67dp"
+        android:layout_marginEnd="67dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="no coordinate yet"
+        android:id="@+id/longitude_field"
+        android:layout_alignTop="@+id/longitude_label"
+        android:layout_alignLeft="@+id/latitude_field"
+        android:layout_alignStart="@+id/latitude_field" />
+</RelativeLayout>

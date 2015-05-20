@@ -6,4 +6,5 @@
     <string name="title_activity_new_post">New Post</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_new_trip">NewTrip</string>
+    <string name="title_activity_gps">GPSActivity</string>
 </resources>

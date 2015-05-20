@@ -1,10 +1,27 @@
 package com.example.evan.travellogger;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ApplicationErrorReport;
 import android.app.Fragment;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.IBinder;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,11 +31,30 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.example.evan.travellogger.interfaces.GPSListener;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
-public class NewPost extends AppCompatActivity {
+public class NewPost extends AppCompatActivity implements GPSListener{
 
     private static final String TAG = NewPost.class.getName();
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int SELECT_PHOTO = 100;
+
 
     private int test = 0;
     private ImageButton cameraButton;
@@ -27,6 +63,18 @@ public class NewPost extends AppCompatActivity {
     private EditText titleField;
     private EditText descriptionField;
 
+    private Toolbar toolbar;
+
+    private ProgressBar gpsLoading;
+    private TextView gpsLoadingTextView;
+    private Location location;
+
+    private ImageView photoView;
+
+    private String mCurrentPhotoPath;
+
+    GPSService gpsService;
+    boolean isBound = false;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,54 +84,194 @@ public class NewPost extends AppCompatActivity {
 
         titleField = (EditText) findViewById(R.id.post_title_field);
         descriptionField = (EditText) findViewById(R.id.post_description_field);
-    }
 
-    public void onCreateView() {
-        
-    }
+        gpsLoading = (ProgressBar) findViewById(R.id.gps_loading_spinner);
+        gpsLoadingTextView = (TextView) findViewById(R.id.gps_loading_text_view);
 
+        photoView = (ImageView) findViewById(R.id.photo_image_view);
 
+        toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        // Attaching the layout to the toolbar object
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_new_post, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if(!isMyServiceRunning(GPSService.class)) {
+            startService(new Intent(getBaseContext(), GPSService.class));
         }
-
-        return super.onOptionsItemSelected(item);
+        Intent intent = new Intent(this, GPSService.class);
+        isBound = getApplicationContext().bindService(
+                intent, myConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void cameraButtonListener(View view) {
         Log.i(TAG, "camera button was pressed");
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
     }
 
     public void galleryButtonListener(View view) {
-        Log.i(TAG, "gallery button was pressed");
+        Log.i(TAG, "gallery button pressed" + mCurrentPhotoPath);
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        File photoFile = null;
+        try {
+            photoFile = createImageFile();
+        } catch (IOException ex) {
+            // Error occurred while creating the File
+        }
+        // Continue only if the File was successfully created
+        if (photoFile != null) {
+            photoPickerIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                    Uri.fromFile(photoFile));
+            startActivityForResult(photoPickerIntent, SELECT_PHOTO);
+        }
     }
 
     public void newPostButtonAction(View view) {
-
-        //Log.e(TAG, "new post button was pressed");
         String title = titleField.getText().toString();
         String description = descriptionField.getText().toString();
-        Post post = new Post(title, description, -1);
-        //titleField.setText(Integer.toString(post.id));
-        //MySQLiteHelper db = new MySQLiteHelper(this);
-        //db.destroy(this);
-        //db.addPost(post);
-        //Post retrieve = db.getPost(post.id);
-        Log.e("got the post", post.title);
+        Post post;
+        if(location != null) {
+            post = new Post(title, description, -1, mCurrentPhotoPath,
+                    location.getLatitude(), location.getLongitude());
+        } else {
+            post = new Post(title, description, -1, mCurrentPhotoPath,
+                    0, 0);
+        }
+        MySQLiteHelper mslh = new MySQLiteHelper(this);
+        Log.i(TAG, "inserting post: " + post.toString());
+        //(new MySQLiteHelper(this)).insertPost(post);
+        mslh.insertPost(post);
+        Post ret = mslh.getPost(post.id);
+        Log.i(TAG, "getting post: " + post.toString());
+
     }
+
+
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        Log.i(TAG, mCurrentPhotoPath);
+        return image;
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //setPic();
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK){
+            switch(requestCode) {
+                case REQUEST_IMAGE_CAPTURE:
+                    Log.i(TAG, "requesting image capture");
+                    Bitmap bitMap = BitmapFactory.decodeFile(mCurrentPhotoPath);
+                    if(bitMap != null) {
+                        cameraButton.setImageBitmap(Bitmap.createScaledBitmap(
+                                bitMap, cameraButton.getWidth(),
+                                cameraButton.getHeight(), false));
+
+                    }
+                    break;
+                case SELECT_PHOTO:
+                    Log.i("result", mCurrentPhotoPath);
+                    Uri selectedImage = data.getData();
+                    InputStream imageStream = null;
+                    try {
+                        imageStream = getContentResolver().openInputStream(selectedImage);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    Bitmap bm = BitmapFactory.decodeStream(imageStream);
+                    Log.i("bitmap size:", String.valueOf(bm.getByteCount()));
+
+                    galleryButton.setImageBitmap(Bitmap.createScaledBitmap(
+                            bm, galleryButton.getWidth(), galleryButton.getHeight(), false));
+                    try {
+                        File file = createImageFile();
+                        FileOutputStream out = new FileOutputStream(file);
+                        bm.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                        out.flush();
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+            }
+        }
+    }
+
+
+
+    @Override
+    public void locationUpdate(Location location) {
+        this.location = location;
+        gpsLoading.setVisibility(View.GONE);
+        gpsLoadingTextView.setText("GPS Location Found");
+    }
+
+    public void onDestroy() {
+        Log.i(TAG, "on destroy being called");
+        if(isBound) {
+            //gpsService.stopSelf();
+            Intent intent = new Intent(this, GPSService.class);
+            //stopService(intent);
+            getApplicationContext().unbindService(myConnection);
+            Log.i(TAG, "Just stopped the service");
+            stopService(new Intent(NewPost.this, GPSService.class));
+        }
+        isBound = false;
+        super.onDestroy();
+    }
+
+
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service :
+                manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private ServiceConnection myConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            GPSService.LocalBinder binder = (GPSService.LocalBinder) service;
+            gpsService = binder.getService();
+            isBound = true;
+            gpsService.addGPSListener(NewPost.this);
+        }
+        public void onServiceDisconnected(ComponentName arg0) {
+            isBound = false;
+
+        }
+    };
 }

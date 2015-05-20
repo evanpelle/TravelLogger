@@ -31,13 +31,13 @@ public class NewTrip extends AppCompatActivity {
 
         MySQLiteHelper db = new MySQLiteHelper(getApplicationContext());
 
-        Log.e("new trip", "this is a test to see log output");
+        /*Log.e("new trip", "this is a test to see log output");
         Trip trip = new Trip("myTitle", "Mydescription", 0);
-        db.addTrip(trip);
+        db.insertTrip(trip);
         Trip retrieval = db.getTrip(trip.id);
         Log.e("retrieal", retrieval.title);
         //Trip retrieve =
-        //db.addTrip("test");
+        //db.addTrip("test"); */
 
     }
 
@@ -71,7 +71,7 @@ public class NewTrip extends AppCompatActivity {
 
         Trip trip = new Trip(tripNameString, tripDescriptionString);
         Log.e("newTripbuttonaction", trip.toString());
-        (new MySQLiteHelper(getApplicationContext())).addTrip(trip);
+        (new MySQLiteHelper(getApplicationContext())).insertTrip(trip);
         Trip.setCurrentTrip(trip);
 
         Log.e("newTripbuttonAction", Trip.getCurrentTrip().toString());
