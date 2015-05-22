@@ -173,7 +173,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             post.longitude = Double.parseDouble(cursor.getString(9));
         } catch (Exception e) {}
 
-
+        cursor.close();
+        db.close();
         //log
         //Log.d("getPost("+id+")", post.title);
 

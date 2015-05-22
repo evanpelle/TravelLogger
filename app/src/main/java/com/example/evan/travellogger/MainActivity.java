@@ -18,7 +18,7 @@ import android.widget.Button;
 import android.support.v7.widget.Toolbar;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getName();
 
     private Button newPostButton;

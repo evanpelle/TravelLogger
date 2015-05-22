@@ -60,6 +60,7 @@ public class NewPost extends AppCompatActivity implements GPSListener{
     private ImageButton cameraButton;
     private ImageButton galleryButton;
 
+
     private EditText titleField;
     private EditText descriptionField;
 
@@ -67,6 +68,8 @@ public class NewPost extends AppCompatActivity implements GPSListener{
 
     private ProgressBar gpsLoading;
     private TextView gpsLoadingTextView;
+    private ImageView checkboxGreen;
+
     private Location location;
 
     private ImageView photoView;
@@ -87,6 +90,8 @@ public class NewPost extends AppCompatActivity implements GPSListener{
 
         gpsLoading = (ProgressBar) findViewById(R.id.gps_loading_spinner);
         gpsLoadingTextView = (TextView) findViewById(R.id.gps_loading_text_view);
+        checkboxGreen = (ImageView) findViewById(R.id.checkbox_green_image_view);
+        checkboxGreen.setVisibility(View.INVISIBLE);
 
         photoView = (ImageView) findViewById(R.id.photo_image_view);
 
@@ -101,6 +106,23 @@ public class NewPost extends AppCompatActivity implements GPSListener{
         Intent intent = new Intent(this, GPSService.class);
         isBound = getApplicationContext().bindService(
                 intent, myConnection, Context.BIND_AUTO_CREATE);
+
+        Log.i(TAG + " oncreate", String.valueOf(cameraButton.getWidth()));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     public void cameraButtonListener(View view) {
@@ -114,6 +136,7 @@ public class NewPost extends AppCompatActivity implements GPSListener{
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
+                Log.i(TAG, "IOException when creating imagefile");
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -188,12 +211,23 @@ public class NewPost extends AppCompatActivity implements GPSListener{
         if(resultCode == RESULT_OK){
             switch(requestCode) {
                 case REQUEST_IMAGE_CAPTURE:
-                    Log.i(TAG, "requesting image capture");
+
                     Bitmap bitMap = BitmapFactory.decodeFile(mCurrentPhotoPath);
+                    Log.i(TAG, "requesting image capture, bitmap: " + mCurrentPhotoPath);
+                    //Log.i(TAG, String.valueOf(bitMap.getWidth()));
                     if(bitMap != null) {
-                        cameraButton.setImageBitmap(Bitmap.createScaledBitmap(
-                                bitMap, cameraButton.getWidth(),
-                                cameraButton.getHeight(), false));
+                        Bitmap scaledBitMap = Bitmap.createScaledBitmap(
+                                bitMap, photoView.getWidth(), photoView.getHeight(), false);
+                        scaledBitMap = ImageHelper.getRoundedCornerBitmap(scaledBitMap, 40);
+                        //scaledBitMap = ImageHelper.getRoundedCornerBitmap(scaledBitMap, 40);
+                        photoView.setImageBitmap(scaledBitMap);
+                        /*photoView.setImageBitmap(Bitmap.createScaledBitmap(
+                                bitMap, photoView.getWidth(),
+                                photoView.getHeight(), false));*/
+                        bitMap.recycle();
+                        //bitMap = ImageHelper.getRoundedCornerBitmap(bitMap, 10);
+                        //photoView.setImageBitmap(bitMap);
+
 
                     }
                     break;
@@ -208,13 +242,17 @@ public class NewPost extends AppCompatActivity implements GPSListener{
                     }
                     Bitmap bm = BitmapFactory.decodeStream(imageStream);
                     Log.i("bitmap size:", String.valueOf(bm.getByteCount()));
-
-                    galleryButton.setImageBitmap(Bitmap.createScaledBitmap(
-                            bm, galleryButton.getWidth(), galleryButton.getHeight(), false));
+                    Bitmap newBitMap = Bitmap.createScaledBitmap(
+                            bm, photoView.getWidth(), photoView.getHeight(), false);
+                    newBitMap = ImageHelper.getRoundedCornerBitmap(newBitMap, 40);
+                    photoView.setImageBitmap(newBitMap);
+                    /*photoView.setImageBitmap(Bitmap.createScaledBitmap(
+                            bm, photoView.getWidth(), photoView.getHeight(), false));*/
                     try {
                         File file = createImageFile();
                         FileOutputStream out = new FileOutputStream(file);
                         bm.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                        bm.recycle();
                         out.flush();
                         out.close();
                     } catch (IOException e) {
@@ -231,6 +269,7 @@ public class NewPost extends AppCompatActivity implements GPSListener{
         this.location = location;
         gpsLoading.setVisibility(View.GONE);
         gpsLoadingTextView.setText("GPS Location Found");
+        checkboxGreen.setVisibility(View.VISIBLE);
     }
 
     public void onDestroy() {

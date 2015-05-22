@@ -50,5 +50,6 @@
             android:layout_gravity="center"
             android:layout_marginTop="160dp"
             android:layout_below="@+id/tool_bar"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:elevation="4dp"/>
 </RelativeLayout>
