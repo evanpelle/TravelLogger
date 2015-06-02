@@ -69,20 +69,17 @@ public class NewTrip extends AppCompatActivity {
         String tripNameString = tripName.getText().toString();
         String tripDescriptionString = tripDescription.getText().toString();
 
-        Trip trip = new Trip(tripNameString, tripDescriptionString);
-        Log.e("newTripbuttonaction", trip.toString());
+        Trip trip = new Trip(tripNameString, tripDescriptionString,
+                Storage.loadInt(Trip.CURRENT_TRIP_ID_KEY, this));
+
+        //Log.e("newTripbuttonaction", trip.toString());
         (new MySQLiteHelper(getApplicationContext())).insertTrip(trip);
-        Trip.setCurrentTrip(trip);
+        Storage.saveInt(Trip.CURRENT_TRIP_ID_KEY, trip.id, this);
 
-        Log.e("newTripbuttonAction", Trip.getCurrentTrip().toString());
+        Log.e("newtripbuttonaction", trip.title + " " + trip.parent_id);
 
-        if(Trip.getCurrentTrip() != null) {
-            Storage.getInstance().saveInt(Trip.CURRENT_TRIP_ID_KEY, Trip.getCurrentTrip().id, this);
-            Log.e("saving trip: ", Trip.getCurrentTrip().toString());
-        } else {
-            Log.e("hi", "current trip is null...");
-        }
-        Intent intent = new Intent(this, NewPost.class);
+        //Log.e("newTripbuttonAction", Trip.getCurrentTrip().toString());
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 

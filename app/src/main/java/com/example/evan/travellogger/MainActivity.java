@@ -1,14 +1,9 @@
 package com.example.evan.travellogger;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -16,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.support.v7.widget.Toolbar;
+import android.widget.TextView;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -23,11 +19,16 @@ public class MainActivity extends AppCompatActivity {
 
     private Button newPostButton;
     private Button newTripButton;
+    private Button end_trip_button;
 
     private ViewPager viewPager;
     private TabsPagerAdapter mAdapter;
     private ActionBar actionBar;
     private Toolbar toolbar;
+
+    private TextView topParentTextView;
+    private TextView middleParentTextView;
+    private TextView bottomParentTextView;
 
 
 
@@ -41,9 +42,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_activity);
         newPostButton = (Button) findViewById(R.id.new_post_button);
         newTripButton = (Button) findViewById(R.id.new_trip_button);
-        Log.e("oncreate", "this is from oncreate");
-        this.loadValues();
 
+        topParentTextView = (TextView) findViewById(R.id.top_parent);
+        middleParentTextView = (TextView) findViewById(R.id.middle_parent);
+        bottomParentTextView = (TextView) findViewById(R.id.bottom_parent);
+
+
+
+        Log.e("oncreate", "this is from oncreate");
+        //this.loadValues();
+        this.generateParentLabels();
         toolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setSupportActionBar(toolbar);
         startService(new Intent(getBaseContext(), GPSService.class));
@@ -51,8 +59,60 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void loadValues() {
-        int currTripId = Storage.getInstance().loadInt(Trip.CURRENT_TRIP_ID_KEY, this);
+    private void generateParentLabels() {
+        topParentTextView.setVisibility(View.INVISIBLE);
+        middleParentTextView.setVisibility(View.INVISIBLE);
+        bottomParentTextView.setVisibility(View.INVISIBLE);
+        int currentTripId = Storage.loadInt(Storage.CURRENT_TRIP_ID_KEY, this);
+        if(currentTripId > 0) {
+            MySQLiteHelper db = new MySQLiteHelper(this);
+            Trip currentTrip = db.getTrip(currentTripId);
+            Trip parentTrip = null;
+            Trip grandTrip = null;
+            if(currentTrip.parent_id > 0) {
+                parentTrip = db.getTrip(currentTrip.parent_id);
+                if(parentTrip.parent_id > 0) {
+                    grandTrip = db.getTrip(parentTrip.parent_id);
+                    topParentTextView.setVisibility(View.VISIBLE);
+                    middleParentTextView.setVisibility(View.VISIBLE);
+                    bottomParentTextView.setVisibility(View.VISIBLE);
+                    topParentTextView.setText(grandTrip.title);
+                    middleParentTextView.setText(parentTrip.title);
+                    bottomParentTextView.setText(currentTrip.title);
+                } else {
+                    topParentTextView.setVisibility(View.VISIBLE);
+                    middleParentTextView.setVisibility(View.VISIBLE);
+                    topParentTextView.setText(parentTrip.title);
+                    middleParentTextView.setText(currentTrip.title);
+                }
+            } else {
+                topParentTextView.setVisibility(View.VISIBLE);
+                topParentTextView.setText(currentTrip.title);
+            }
+        } else {
+            topParentTextView.setVisibility(View.VISIBLE);
+            topParentTextView.setText("NO CURRENT TRIP");
+        }
+    }
+
+    public void endTripButtonAction(View view) {
+        int currentTripId = Storage.loadInt(Trip.CURRENT_TRIP_ID_KEY, this);
+        if(currentTripId > 0) {
+            MySQLiteHelper db = new MySQLiteHelper(this);
+            Trip currentTrip = db.getTrip(currentTripId);
+            int parentTripId = currentTrip.parent_id;
+            if (parentTripId > 0) {
+                Storage.saveInt(Trip.CURRENT_TRIP_ID_KEY, parentTripId, this);
+            } else {
+                Storage.saveInt(Trip.CURRENT_TRIP_ID_KEY, -1, this);
+            }
+            this.generateParentLabels();
+        }
+    }
+
+
+   /* private void loadValues() {
+        int currTripId = Storage.loadInt(Trip.CURRENT_TRIP_ID_KEY, this);
         Trip currTrip = null;
         Log.e("loadvalues", String.valueOf(currTripId));
         if(currTripId != Integer.MIN_VALUE) {
@@ -73,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.e("hi", "current trip is null...");
         }
-    }
+    } */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -100,7 +160,10 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    public void viewTripButtonAction(View view) {
+        Intent intent = new Intent(this, MapActivity.class);
+        startActivity(intent);
+    }
 
     public void newPostButtonAction(View view) {
         startNewPostActivity(view);
@@ -131,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onStop() {
         super.onStop();
-        Log.e("mainactivity", "onstop is being called here");
+        Log.i("mainactivity", "onstop is being called here");
         //this.saveValues();
 
     }

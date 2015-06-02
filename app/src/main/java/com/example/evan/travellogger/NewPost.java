@@ -206,6 +206,7 @@ public class NewPost extends AppCompatActivity implements GPSListener{
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         //setPic();
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK){

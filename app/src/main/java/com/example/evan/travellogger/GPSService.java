@@ -26,6 +26,8 @@ public class GPSService extends Service implements LocationListener {
     private GPSListener listener;
     private final IBinder localBinder = new LocalBinder();
 
+    private boolean isPaused = false;
+
     public void onCreate() {}
 
     public int onStartCommand(Intent intent, int flags, int startId) {

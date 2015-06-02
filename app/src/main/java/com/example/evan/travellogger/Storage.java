@@ -15,27 +15,26 @@ public class Storage extends Activity {
     private static final Storage instance = new Storage();
     private static final String FILE = "file";
 
+    public static final String CURRENT_TRIP_ID_KEY = "current_trip";
+
+
     private Storage() {
 
     }
 
-    public void saveInt(String name, int i, Activity activity) {
+    public static void saveInt(String name, int i, Context context) {
         //SharedPreferences.Editor editor =
         //        activity.getSharedPreferences("hi", Context.MODE_PRIVATE).edit();
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         SharedPreferences prefs =
-                activity.getSharedPreferences(FILE, Context.MODE_PRIVATE);
+                context.getSharedPreferences(FILE, Context.MODE_PRIVATE);
         prefs.edit().putInt(name, i).commit();
     }
 
     //returns minvalue if nothing found
-    public int loadInt(String name, Activity activity) {
-        SharedPreferences values = activity.getSharedPreferences(FILE, Context.MODE_PRIVATE);
+    public static int loadInt(String name, Context context) {
+        SharedPreferences values = context.getSharedPreferences(FILE, Context.MODE_PRIVATE);
         return values.getInt(name, Integer.MIN_VALUE);
-    }
-
-    public static Storage getInstance() {
-        return instance;
     }
 }

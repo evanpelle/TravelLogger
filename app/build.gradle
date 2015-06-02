@@ -10,10 +10,22 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    signingConfigs {
+        release {
+         storeFile file("myreleasekey.jks")
+            storePassword "password"
+            keyAlias "evan"
+            keyPassword "password"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+
         }
     }
     productFlavors {
@@ -23,4 +35,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.google.android.gms:play-services:7.3.0'
+    compile 'com.google.android.gms:play-services-maps:7.3.0'
 }

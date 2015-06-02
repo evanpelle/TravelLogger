@@ -39,12 +39,4 @@ public class Trip {
                 ", id: " + this.id;
     }
 
-    public static void setCurrentTrip(Trip trip) {
-        Trip.current_trip = trip;
-    }
-
-    public static Trip getCurrentTrip() {
-        return Trip.current_trip;
-    }
-
 }

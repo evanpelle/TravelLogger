@@ -7,6 +7,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class MySQLiteHelper extends SQLiteOpenHelper {
 
     public static final String TABLE_TRIPS = "trips";
@@ -15,9 +21,10 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     //THESE ARE THE TRIP COLUMNS
     public static final String TRIP_KEY_ID = "id";
     public static final String TRIP_KEY_TITLE = "title";
-    public static final String TRIP_KEY_DESCRIPTION = "name";
+    public static final String TRIP_KEY_DESCRIPTION = "description";
+    public static final String TRIP_KEY_PARENT_ID = "parent_id";
     private static final String[] TRIP_COLUMNS =
-            {TRIP_KEY_ID,TRIP_KEY_TITLE,TRIP_KEY_DESCRIPTION};
+            {TRIP_KEY_ID,TRIP_KEY_TITLE,TRIP_KEY_DESCRIPTION, TRIP_KEY_PARENT_ID};
     //public static final String
 
     private static final String DATABASE_NAME = "test.db";
@@ -48,7 +55,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String CREATE_TRIP_TABLE = "CREATE TABLE trips ( " +
             "id INTEGER PRIMARY KEY, " +
             "title TEXT, " +
-            "description TEXT)";
+            "description TEXT, " +
+            "parent_id INTEGER)";
 
     private static final String CREATE_POST_TABLE = "CREATE TABLE posts ( " +
             POST_KEY_ID           + " INTEGER PRIMARY KEY, " +
@@ -73,6 +81,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(CREATE_POST_TABLE);
     }
 
+
     public void destroy(Context context) {
         context.deleteDatabase(this.DATABASE_NAME);
     }
@@ -84,12 +93,40 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         values.put("id", trip.id);
         values.put("title", trip.title); // get title
         values.put("description", trip.description); // get author
+        values.put("parent_id", trip.parent_id);
         db.insert("trips",
                 null, //nullColumnHack
                 values); // key/value -> keys = column names/ values = column values
 
         // 4. close
         db.close();
+    }
+
+    public void insert(String table, ContentValues values) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.insert(table, null, values);
+        db.close();
+    }
+
+    public Map<String, String> retrieve(String table, String[] columns, int id) {
+        Map<String, String> entries = new HashMap<String, String>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor =
+                db.query(table, // a. table
+                        columns, // b. column names
+                        " id = ?", // c. selections
+                        new String[] { String.valueOf(id) }, // d. selections args
+                        null, // e. group by
+                        null, // f. having
+                        null, // g. order by
+                        null); // h. limit
+
+        for(String columnName : columns) {
+            String key = columnName;
+            String value = cursor.getString(cursor.getColumnIndex(columnName));
+            entries.put(key, value);
+        }
+        return entries;
     }
 
 
@@ -109,6 +146,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         db.close();
     }
     public Trip getTrip(int id){
+        if(id == -1) return null;
 
         // 1. get reference to readable DB
         SQLiteDatabase db = this.getReadableDatabase();
@@ -127,9 +165,18 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         // 3. if we got results get the first one
         if (cursor != null)
             cursor.moveToFirst();
+        int parent_id = -1;
+        try{
+            parent_id = Integer.parseInt(cursor.getString(3));
+        } catch(Exception e) {
+
+        }
+        Log.i("loading_trip", String.valueOf(parent_id));
+
 
         // 4. build book object
-        Trip trip = new Trip(cursor.getString(1), cursor.getString(2), 0);
+        Trip trip = new Trip(cursor.getString(1), cursor.getString(2),
+               parent_id);
         trip.id = (Integer.parseInt(cursor.getString(0)));
 
 
@@ -140,7 +187,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return trip;
     }
 
-    public Post getPost(int id){
+    public Post getPost(int id) {
+        Map<String, String> entries = this.retrieve(TABLE_POSTS, POST_COLUMNS, id);
+
+        return null;
+    }
+
+    /*public Post getPost(int id){
 
         // 1. get reference to readable DB
         SQLiteDatabase db = this.getReadableDatabase();
@@ -162,8 +215,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // 4. build post object
         Post post = new Post(cursor.getString(1), cursor.getString(2), -1, null, 0, 0);
-        post.id = (Integer.parseInt(cursor.getString(0)));
-        post.parentTripId = (Integer.parseInt(cursor.getString(3)));
+        post.id = cursor.getInt(0);//(Integer.parseInt(cursor.getString(0)));
+        post.parentTripId = cursor.getInt(3);//(Integer.parseInt(cursor.getString(3)));
         post.timeStamp = cursor.getString(4);
         post.city = cursor.getString(5);
         post.country = cursor.getString(6);
@@ -180,6 +233,32 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // 5. return book
         return post;
+    } */
+
+    public Post[] getChildPost(Trip parent) {
+        // 1. get reference to readable DB
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // 2. build query
+        Cursor cursor =
+                db.query(TABLE_POSTS, // a. table
+                        POST_COLUMNS, // b. column names
+                        " parent_id = ?", // c. selections
+                        new String[] { String.valueOf(parent.id) }, // d. selections args
+                        null, // e. group by
+                        null, // f. having
+                        null, // g. order by
+                        null); // h. limit
+
+        // 3. if we got results get the first one
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        return null;
+    }
+
+    public Trip[] getChildTrip(Trip parent) {
+        return null;
     }
 
 
