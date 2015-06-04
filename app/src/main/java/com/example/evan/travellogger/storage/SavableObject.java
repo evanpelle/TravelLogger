@@ -1,16 +1,11 @@
-package com.example.evan.travellogger;
+package com.example.evan.travellogger.storage;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -60,7 +55,10 @@ public abstract class SavableObject {
         ContentValues values = this.getValues();
         MySQLiteHelper helper = new MySQLiteHelper(context);
         if(!helper.hasTable(this.getTableName())) {//make sure table exists
-            helper.createTable(this.getTableName(), this.getValues(), context);
+            helper.createTable(this.getTableName(), this.getValues());
+        }
+        for (String key : values.keySet()) {
+            Log.i("inserting: " + key, values.get(key).toString());
         }
         helper.insert(TABLE_NAME, values);
         return this.id;
@@ -94,24 +92,26 @@ public abstract class SavableObject {
             Log.e("SavableObject", e.toString());
         }
         ContentValues values = helper.retrieve(tableName, id);
-
-        Log.e("the size: ", String.valueOf(values.size()));
-        for(String v : values.keySet()) {
-            Log.e("from loading values", v + " " + values.get(v).toString());
+        //values contains null objects...
+        for (String key : values.keySet()) {
+            //Log.i("retrieving: " + key, values.get(key).toString());
         }
+        Log.e("the size: ", String.valueOf(values.size()));
         for(Field field : soClass.getDeclaredFields()) {
             String fieldName = field.getName();
             String value = (String) values.get(fieldName);
             try {
-                Class fieldClass = field.get(so).getClass();
+                Class fieldClass = field.getType();
                 if (fieldClass == String.class) {
                     field.set(so, value);
-                } else if (fieldClass == Double.class) {
+                } else if (fieldClass == Double.class || fieldClass == double.class) {
                     field.setDouble(so, Double.parseDouble(value));
-                } else if (fieldClass == Integer.class) {
+                } else if (fieldClass == Integer.class || fieldClass == int.class) {
                     field.setInt(so, Integer.parseInt(value));
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return so;
     }

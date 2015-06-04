@@ -9,16 +9,16 @@ import java.util.Date;
  */
 public class Post
 {
-    String title;
-    String description;
-    String pictureFile;
-    String timeStamp;
-    String city;
-    String country;
-    int id;
-    int parentTripId;
-    double longitude;
-    double latitude;
+    public String title;
+    public String description;
+    public String pictureFile;
+    public String timeStamp;
+    public String city;
+    public String country;
+    public int id;
+    public int parentTripId;
+    public double longitude;
+    public double latitude;
 
 
     public Post(String title, String description, int parentTripId,

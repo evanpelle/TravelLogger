@@ -1,19 +1,19 @@
-package com.example.evan.travellogger;
+package com.example.evan.travellogger.storage;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.nfc.Tag;
 import android.util.Log;
+
+import com.example.evan.travellogger.Post;
+import com.example.evan.travellogger.Trip;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MySQLiteHelper extends SQLiteOpenHelper {
 
@@ -88,8 +88,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(CREATE_POST_TABLE);
     }
 
-    public void createTable(String tableName, ContentValues values, Context context) {
-        Map<String, String> tableMap = new HashMap<String,String>();
+    public void createTable(String tableName, ContentValues values) {
+        Map<String, String> tableMap = new HashMap<>();
         for(String key : values.keySet()) {
             String keyType = "";
             Class c = values.get(key).getClass();
@@ -115,7 +115,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    //need to test this
     public boolean hasTable(String tableName) {
         return listTables().contains(tableName);
     }
@@ -135,6 +134,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             while (cursor.moveToNext());
         }
         cursor.close();
+        db.close();
         return tableList;
     }
 
@@ -143,7 +143,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         context.deleteDatabase(this.DATABASE_NAME);
     }
 
-    public void insertTrip(Trip trip) {
+    /*public void insertTrip(Trip trip) {
         Log.e("adding trip", trip.title);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -157,7 +157,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // 4. close
         db.close();
-    }
+    } */
 
     public void insert(String table, ContentValues values) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -181,12 +181,11 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                         null); // h. limit
         cursor.moveToFirst();
         for(String columnName : columns) {
-            Log.e("column from database: ",columnName);
+            //Log.e("column from database: ",columnName);
             String key = columnName;
             try {
-                //TODO cursor doesn't have anything stored (probably) columns if doing aight tho
-                Log.e("helper", columnName + " " +
-                        cursor.getString(0));
+                //Log.e("helper", columnName + " " +
+                //        cursor.getString(0));
                 String value = cursor.getString(cursor.getColumnIndex(columnName));
                 entries.put(key, value);
             } catch (Exception e) {
@@ -194,11 +193,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             }
         }
         cursor.close();
+        db.close();
         return entries;
     }
 
 
-    public void insertPost(Post post) {
+    /*public void insertPost(Post post) {
         Log.e("adding post", post.title);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -212,8 +212,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // 4. close
         db.close();
-    }
-    public Trip getTrip(int id){
+    } */
+    /*public Trip getTrip(int id){
         if(id == -1) return null;
 
         // 1. get reference to readable DB
@@ -253,7 +253,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // 5. return book
         return trip;
-    }
+    } */
 
     /*public Post getPost(int id){
 
@@ -297,7 +297,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return post;
     } */
 
-    public Post[] getChildPost(Trip parent) {
+    /*public Post[] getChildPost(Trip parent) {
         // 1. get reference to readable DB
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -317,18 +317,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             cursor.moveToFirst();
 
         return null;
-    }
-
-    public Trip[] getChildTrip(Trip parent) {
-        return null;
-    }
-
-
-
-
-    public void getAllTrips() {
-
-    }
+    } */
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -339,5 +328,4 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_POSTS);
         onCreate(db);
     }
-
 } 

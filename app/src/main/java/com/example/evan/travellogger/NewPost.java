@@ -1,16 +1,10 @@
 package com.example.evan.travellogger;
 
-import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ApplicationErrorReport;
-import android.app.Fragment;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
@@ -18,17 +12,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
 import android.provider.MediaStore;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -36,14 +25,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.evan.travellogger.interfaces.GPSListener;
+import com.example.evan.travellogger.storage.MySQLiteHelper;
+import com.example.evan.travellogger.storage.SavableObject;
+import com.example.evan.travellogger.storage.SavablePost;
+import com.example.evan.travellogger.storage.SavableTrip;
+import com.example.evan.travellogger.storage.Storage;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -168,20 +160,27 @@ public class NewPost extends AppCompatActivity implements GPSListener{
     public void newPostButtonAction(View view) {
         String title = titleField.getText().toString();
         String description = descriptionField.getText().toString();
-        Post post;
+        int parentTripId = Storage.loadInt(SavableTrip.CURRENT_TRIP_ID_KEY, this);
+        //Post post;
+        SavablePost sp = new SavablePost(title, description, this);
+        sp.pictureFile = mCurrentPhotoPath;
+        sp.parentTripId = parentTripId;
         if(location != null) {
-            post = new Post(title, description, -1, mCurrentPhotoPath,
-                    location.getLatitude(), location.getLongitude());
+            //post = new Post(title, description, -1, mCurrentPhotoPath,
+            //        location.getLatitude(), location.getLongitude());
+            sp.latitude = location.getLatitude();
+            sp.longitude = location.getLongitude();
         } else {
-            post = new Post(title, description, -1, mCurrentPhotoPath,
-                    0, 0);
+           // post = new Post(title, description, -1, mCurrentPhotoPath,
+           //         0, 0);
         }
+        int spId = sp.save(this);
         MySQLiteHelper mslh = new MySQLiteHelper(this);
-        Log.i(TAG, "inserting post: " + post.toString());
+        //Log.i(TAG, "inserting post: " + post.toString());
         //(new MySQLiteHelper(this)).insertPost(post);
-        mslh.insertPost(post);
+        //mslh.insertPost(post);
         //Post ret = mslh.getPost(post.id);
-        Log.i(TAG, "getting post: " + post.toString());
+        Log.i(TAG, "getting post: " + (SavableObject.load(spId, this)).toString());
 
     }
 

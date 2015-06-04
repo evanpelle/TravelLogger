@@ -1,17 +1,15 @@
-package com.example.evan.travellogger;
+package com.example.evan.travellogger.storage;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 /**
  * Created by evan on 5/13/15.
  */
 
 public class Storage extends Activity {
+
     private static final Storage instance = new Storage();
     private static final String FILE = "file";
 

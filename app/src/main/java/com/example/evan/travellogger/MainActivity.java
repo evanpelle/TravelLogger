@@ -13,6 +13,12 @@ import android.widget.Button;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
+import com.example.evan.travellogger.storage.MySQLiteHelper;
+import com.example.evan.travellogger.storage.SavableObject;
+import com.example.evan.travellogger.storage.SavablePost;
+import com.example.evan.travellogger.storage.SavableTrip;
+import com.example.evan.travellogger.storage.Storage;
+
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getName();
@@ -55,21 +61,20 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setSupportActionBar(toolbar);
         startService(new Intent(getBaseContext(), GPSService.class));
-        //test();
+        test();
         //Log.i(TAG, this.getClass().getSimpleName());
     }
 
-   /* public void test() {
-        SavablePost sp = new SavablePost(this);
-        sp.myString = "omg it changed and saved and worked!!!";
-        sp.myDouble = 42.42;
-        sp.myInt = 42;
-        int soId = sp.save(this);
-        sp = (SavablePost) SavableObject.load(soId, this);
-        Log.i(TAG, sp.toString());
+   public void test() {
+       SavableTrip st = new SavableTrip(this);
+       st.title = "this should work";
+       st.description = "this is the description";
+       st.save(this);
+       st = (SavableTrip) SavableObject.load(st.getId(), this);
+       Log.i(TAG, st.toString());
 
 
-    } */
+    }
 
     private void generateParentLabels() {
         topParentTextView.setVisibility(View.INVISIBLE);
@@ -77,14 +82,20 @@ public class MainActivity extends AppCompatActivity {
         bottomParentTextView.setVisibility(View.INVISIBLE);
         int currentTripId = Storage.loadInt(Storage.CURRENT_TRIP_ID_KEY, this);
         if(currentTripId > 0) {
-            MySQLiteHelper db = new MySQLiteHelper(this);
-            Trip currentTrip = db.getTrip(currentTripId);
+            //MySQLiteHelper db = new MySQLiteHelper(this);
+            /*Trip currentTrip = db.getTrip(currentTripId);
             Trip parentTrip = null;
-            Trip grandTrip = null;
-            if(currentTrip.parent_id > 0) {
-                parentTrip = db.getTrip(currentTrip.parent_id);
-                if(parentTrip.parent_id > 0) {
-                    grandTrip = db.getTrip(parentTrip.parent_id);
+            Trip grandTrip = null;*/
+            SavableTrip currentTrip = (SavableTrip) SavableObject.load(currentTripId, this);
+            SavableTrip parentTrip = null;
+            SavableTrip grandTrip = null;
+            Log.i(TAG, currentTrip.toString());
+            if(currentTrip.parentId > 0) {
+                //parentTrip = db.getTrip(currentTrip.parent_id);
+                parentTrip = (SavableTrip) SavableObject.load(currentTrip.parentId, this);
+                if(parentTrip.parentId > 0) {
+                    //grandTrip = db.getTrip(parentTrip.parent_id);
+                    grandTrip = (SavableTrip) SavableObject.load(parentTrip.parentId, this);
                     topParentTextView.setVisibility(View.VISIBLE);
                     middleParentTextView.setVisibility(View.VISIBLE);
                     bottomParentTextView.setVisibility(View.VISIBLE);
@@ -108,15 +119,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void endTripButtonAction(View view) {
-        int currentTripId = Storage.loadInt(Trip.CURRENT_TRIP_ID_KEY, this);
+        int currentTripId = Storage.loadInt(Storage.CURRENT_TRIP_ID_KEY, this);
         if(currentTripId > 0) {
-            MySQLiteHelper db = new MySQLiteHelper(this);
-            Trip currentTrip = db.getTrip(currentTripId);
-            int parentTripId = currentTrip.parent_id;
+            //MySQLiteHelper db = new MySQLiteHelper(this);
+            //Trip currentTrip = db.getTrip(currentTripId);
+            SavableTrip currentTrip = (SavableTrip) SavableObject.load(currentTripId, this);
+            int parentTripId = currentTrip.parentId;
             if (parentTripId > 0) {
-                Storage.saveInt(Trip.CURRENT_TRIP_ID_KEY, parentTripId, this);
+                Storage.saveInt(Storage.CURRENT_TRIP_ID_KEY, parentTripId, this);
             } else {
-                Storage.saveInt(Trip.CURRENT_TRIP_ID_KEY, -1, this);
+                Storage.saveInt(Storage.CURRENT_TRIP_ID_KEY, -1, this);
             }
             this.generateParentLabels();
         }

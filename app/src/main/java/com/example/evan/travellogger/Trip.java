@@ -8,11 +8,11 @@ import java.util.Calendar;
  * Created by evan on 5/6/15.
  */
 public class Trip {
-    int id;
-    int parent_id;
-    String title;
-    String description;
-    Calendar startDatetime;
+    public int id;
+    public int parent_id;
+    public String title;
+    public String description;
+    public Calendar startDatetime;
 
     public static final String PREFS_NAME = "myPrefs";
     private static Trip current_trip;

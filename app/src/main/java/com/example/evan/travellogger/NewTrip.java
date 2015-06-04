@@ -1,8 +1,6 @@
 package com.example.evan.travellogger;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,6 +9,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.PopupWindow;
+
+import com.example.evan.travellogger.storage.MySQLiteHelper;
+import com.example.evan.travellogger.storage.SavableTrip;
+import com.example.evan.travellogger.storage.Storage;
 
 
 public class NewTrip extends AppCompatActivity {
@@ -69,6 +71,13 @@ public class NewTrip extends AppCompatActivity {
         String tripNameString = tripName.getText().toString();
         String tripDescriptionString = tripDescription.getText().toString();
 
+        SavableTrip st = new SavableTrip(tripNameString, tripDescriptionString, this);
+        st.parentId = Storage.loadInt(Storage.CURRENT_TRIP_ID_KEY, this);
+        Storage.saveInt(Storage.CURRENT_TRIP_ID_KEY, st.getId(), this);
+        st.save(this);
+
+        /*
+
         Trip trip = new Trip(tripNameString, tripDescriptionString,
                 Storage.loadInt(Trip.CURRENT_TRIP_ID_KEY, this));
 
@@ -79,6 +88,9 @@ public class NewTrip extends AppCompatActivity {
         Log.e("newtripbuttonaction", trip.title + " " + trip.parent_id);
 
         //Log.e("newTripbuttonAction", Trip.getCurrentTrip().toString());
+        */
+
+
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
