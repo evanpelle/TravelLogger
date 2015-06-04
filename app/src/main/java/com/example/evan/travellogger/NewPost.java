@@ -180,7 +180,7 @@ public class NewPost extends AppCompatActivity implements GPSListener{
         Log.i(TAG, "inserting post: " + post.toString());
         //(new MySQLiteHelper(this)).insertPost(post);
         mslh.insertPost(post);
-        Post ret = mslh.getPost(post.id);
+        //Post ret = mslh.getPost(post.id);
         Log.i(TAG, "getting post: " + post.toString());
 
     }

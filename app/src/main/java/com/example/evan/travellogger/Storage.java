@@ -22,6 +22,17 @@ public class Storage extends Activity {
 
     }
 
+    public static void saveString(String fileName, String name, String value, Context context) {
+        SharedPreferences prefs =
+                context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+        prefs.edit().putString(name, value).commit();
+    }
+
+    public static String loadString(String fileName, String name, Context context) {
+        SharedPreferences values = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+        return values.getString(name, null);
+    }
+
     public static void saveInt(String name, int i, Context context) {
         //SharedPreferences.Editor editor =
         //        activity.getSharedPreferences("hi", Context.MODE_PRIVATE).edit();

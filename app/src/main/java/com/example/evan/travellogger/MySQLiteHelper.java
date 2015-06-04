@@ -5,8 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.nfc.Tag;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +16,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class MySQLiteHelper extends SQLiteOpenHelper {
+
+    //java double is sql float
+    public static final String DOUBLE_TYPE = "FLOAT";
+    public static final String INTEGER_TYPE = "INTEGER";
+    public static final String STRING_TYPE = "TEXT";
 
     public static final String TABLE_TRIPS = "trips";
     public static final String TABLE_POSTS = "posts";
@@ -81,6 +88,56 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(CREATE_POST_TABLE);
     }
 
+    public void createTable(String tableName, ContentValues values, Context context) {
+        Map<String, String> tableMap = new HashMap<String,String>();
+        for(String key : values.keySet()) {
+            String keyType = "";
+            Class c = values.get(key).getClass();
+            if(c == String.class) {
+                keyType = MySQLiteHelper.STRING_TYPE;
+            }else if(c == Double.class) {
+                keyType = MySQLiteHelper.DOUBLE_TYPE;
+            } else if(c == Integer.class) {
+                keyType = MySQLiteHelper.INTEGER_TYPE;
+            } else {continue;}
+            tableMap.put(key, keyType);
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + tableName);
+        String createTable = "CREATE TABLE " + tableName + " ( ";
+        for(Map.Entry<String,String> entry : tableMap.entrySet()) {
+            createTable += entry.getKey() + " " + entry.getValue() + ", ";
+        }
+        //need to remove the comma at the end of the string
+        createTable = createTable.substring(0, createTable.length()-2);
+        createTable += " )";
+        db.execSQL(createTable);
+        db.close();
+    }
+
+    //need to test this
+    public boolean hasTable(String tableName) {
+        return listTables().contains(tableName);
+    }
+
+    public List<String> listTables()
+    {
+        ArrayList<String> tableList = new ArrayList<String>();
+        SQLiteDatabase db = this.getWritableDatabase();
+        String SQL_GET_ALL_TABLES = "SELECT name FROM " +
+                "sqlite_master WHERE type='table' ORDER BY name";
+        Cursor cursor = db.rawQuery(SQL_GET_ALL_TABLES, null);
+        cursor.moveToFirst();
+        if (!cursor.isAfterLast()) {
+            do {
+                tableList.add(cursor.getString(0));
+            }
+            while (cursor.moveToNext());
+        }
+        cursor.close();
+        return tableList;
+    }
+
 
     public void destroy(Context context) {
         context.deleteDatabase(this.DATABASE_NAME);
@@ -108,9 +165,11 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public Map<String, String> retrieve(String table, String[] columns, int id) {
-        Map<String, String> entries = new HashMap<String, String>();
+    public ContentValues retrieve(String table, int id) {
+        ContentValues entries = new ContentValues();
         SQLiteDatabase db = this.getReadableDatabase();
+        Cursor columnCursor = db.query(table, null, null, null, null, null, null);
+        String[] columns = columnCursor.getColumnNames();
         Cursor cursor =
                 db.query(table, // a. table
                         columns, // b. column names
@@ -120,12 +179,21 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                         null, // f. having
                         null, // g. order by
                         null); // h. limit
-
+        cursor.moveToFirst();
         for(String columnName : columns) {
+            Log.e("column from database: ",columnName);
             String key = columnName;
-            String value = cursor.getString(cursor.getColumnIndex(columnName));
-            entries.put(key, value);
+            try {
+                //TODO cursor doesn't have anything stored (probably) columns if doing aight tho
+                Log.e("helper", columnName + " " +
+                        cursor.getString(0));
+                String value = cursor.getString(cursor.getColumnIndex(columnName));
+                entries.put(key, value);
+            } catch (Exception e) {
+                Log.e("helperException", e.toString());
+            }
         }
+        cursor.close();
         return entries;
     }
 
@@ -185,12 +253,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // 5. return book
         return trip;
-    }
-
-    public Post getPost(int id) {
-        Map<String, String> entries = this.retrieve(TABLE_POSTS, POST_COLUMNS, id);
-
-        return null;
     }
 
     /*public Post getPost(int id){

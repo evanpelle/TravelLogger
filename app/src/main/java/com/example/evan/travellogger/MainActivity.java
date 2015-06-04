@@ -55,9 +55,21 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setSupportActionBar(toolbar);
         startService(new Intent(getBaseContext(), GPSService.class));
-
-
+        //test();
+        //Log.i(TAG, this.getClass().getSimpleName());
     }
+
+   /* public void test() {
+        SavablePost sp = new SavablePost(this);
+        sp.myString = "omg it changed and saved and worked!!!";
+        sp.myDouble = 42.42;
+        sp.myInt = 42;
+        int soId = sp.save(this);
+        sp = (SavablePost) SavableObject.load(soId, this);
+        Log.i(TAG, sp.toString());
+
+
+    } */
 
     private void generateParentLabels() {
         topParentTextView.setVisibility(View.INVISIBLE);
