@@ -28,7 +28,7 @@ public class SavablePost extends SavableObject {
     }
 
     public SavablePost(String title, String description, Context context) {
-        super(context);
+        this(context);
         this.title = title;
         this.description = description;
     }

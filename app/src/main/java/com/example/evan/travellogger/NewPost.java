@@ -161,7 +161,6 @@ public class NewPost extends AppCompatActivity implements GPSListener{
         String title = titleField.getText().toString();
         String description = descriptionField.getText().toString();
         int parentTripId = Storage.loadInt(SavableTrip.CURRENT_TRIP_ID_KEY, this);
-        //Post post;
         SavablePost sp = new SavablePost(title, description, this);
         sp.pictureFile = mCurrentPhotoPath;
         sp.parentTripId = parentTripId;
@@ -174,6 +173,7 @@ public class NewPost extends AppCompatActivity implements GPSListener{
            // post = new Post(title, description, -1, mCurrentPhotoPath,
            //         0, 0);
         }
+        Log.i(TAG, "original post: " + sp.toString());
         int spId = sp.save(this);
         MySQLiteHelper mslh = new MySQLiteHelper(this);
         //Log.i(TAG, "inserting post: " + post.toString());
