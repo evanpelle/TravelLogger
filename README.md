@@ -1,0 +1,3 @@
+An android app. The idea is to take a picture while the app finds your location,
+then you can see a map of all the places you've been along with the pictures you took at those places.
+I stopped half way through...
